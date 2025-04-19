@@ -3,6 +3,7 @@ import React, {use, useEffect, useState, useRef} from 'react';
 import MapView, {Marker} from 'react-native-maps';
 import {getCurrentLocation} from '../utils/getCurrentLocation';
 import GetLocation from 'react-native-get-location';
+import axios from 'axios';
 
 type LocationType = {
   latitude: number;
@@ -11,33 +12,49 @@ type LocationType = {
 
 const HomeScreen = () => {
   const mapRef = useRef<MapView>(null);
+  const [address, setAddress] = useState('');
   const [userLocation, setUserLocation] = useState<LocationType>(null);
 
+  // useEffect(() => {}, []);
+
   useEffect(() => {
-    GetLocation.getCurrentPosition({
-      enableHighAccuracy: true,
-      timeout: 60000,
-    })
-      .then(location => {
-        console.log(location);
-        setUserLocation({
-          latitude: location.latitude,
-          longitude: location.longitude,
-        });
-        if (mapRef) {
-          mapRef.current?.animateCamera({
-            center: {
+    const getCurrentLocation = async () => {
+      GetLocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 60000,
+      })
+        .then(async location => {
+          console.log(location);
+          setUserLocation({
+            latitude: location.latitude,
+            longitude: location.longitude,
+          });
+          if (mapRef) {
+            mapRef.current?.animateToRegion({
               latitude: location.latitude,
               longitude: location.longitude,
-            },
-            zoom: 30,
-          });
-        }
-      })
-      .catch(error => {
-        const {code, message} = error;
-        console.warn(code, message);
-      });
+              latitudeDelta: 0.0022,
+              longitudeDelta: 0.0022,
+            });
+          }
+
+          const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${location.latitude}&lon=${location.longitude}&apiKey=64594ba6f0694213aa44db37224476c6`;
+          console.log('Geoapify URL:', url);
+          const {data} = await axios.get(url);
+          console.log(data);
+          const addressLine2 = data?.features?.[0]?.properties?.address_line2;
+
+          if (addressLine2) {
+            setAddress(addressLine2);
+          }
+          console.log('Address:', addressLine2);
+        })
+        .catch(error => {
+          const {code, message} = error;
+          console.warn(code, message);
+        });
+    };
+    getCurrentLocation();
   }, []);
 
   return (
@@ -79,7 +96,7 @@ const HomeScreen = () => {
         <View style={styles.inputWrapper}>
           <View style={styles.location} />
           <TextInput
-            value={''}
+            value={address}
             // onChangeText={setLocation}
             placeholder="Current location"
             style={styles.textInput}

@@ -1,7 +1,13 @@
 import {View, StyleSheet, Image} from 'react-native';
-import React from 'react';
+import React, {useEffect} from 'react';
 
-const SplashCreen = () => {
+const SplashCreen = ({navigation}: any) => {
+  useEffect(() => {
+    setTimeout(() => {
+      // navigate to Home Screen
+      navigation.replace('Home');
+    }, 2500);
+  });
   return (
     <View style={styles.container}>
       <Image

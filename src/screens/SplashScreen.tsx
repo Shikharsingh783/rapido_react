@@ -1,19 +1,31 @@
-import {View, Text} from 'react-native';
+import {View, StyleSheet, Image} from 'react-native';
 import React from 'react';
-import MapView from 'react-native-maps';
 
 const SplashCreen = () => {
   return (
-    <MapView
-      style={{flex: 1}}
-      initialRegion={{
-        latitude: 37.78825,
-        longitude: -122.4324,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      }}
-    />
+    <View style={styles.container}>
+      <Image
+        style={styles.logo}
+        resizeMode="contain"
+        source={{
+          uri: 'https://logowik.com/content/uploads/images/rapido-bike-taxi8263.jpg',
+        }}
+      />
+    </View>
   );
 };
 
 export default SplashCreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logo: {
+    width: 400,
+    height: 400,
+  },
+});

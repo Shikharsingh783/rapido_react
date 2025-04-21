@@ -1,12 +1,27 @@
-import {View, Text, StyleSheet} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
 import React from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import CustomAutocomplete from '../utils/customAutoComplete';
+import {Navigation} from '../../rapido/src/navigation';
 
-const Destination = () => {
+const Destination = ({navigation}: any) => {
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>Search Location</Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginBottom: 20,
+        }}>
+        <TouchableOpacity onPress={navigation.goBack}>
+          <Image
+            source={require('../../assets/back2.png')}
+            style={{width: 15, height: 15}}
+          />
+        </TouchableOpacity>
+        <Text style={styles.header}>Search Destination</Text>
+      </View>
+
       <CustomAutocomplete />
     </SafeAreaView>
   );
@@ -21,7 +36,7 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 20,
     fontWeight: '600',
-    marginBottom: 12,
+    marginLeft: 80,
   },
 });
 

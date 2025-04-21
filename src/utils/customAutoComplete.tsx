@@ -1,6 +1,10 @@
 import React, {useState} from 'react';
 import {TextInput, FlatList, Text, TouchableOpacity, View} from 'react-native';
 import axios from 'axios';
+// import {Navigation} from '../../rapido/src/navigation';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../routes/types';
 
 interface GeoapifyPlace {
   properties: {
@@ -11,6 +15,8 @@ interface GeoapifyPlace {
 }
 
 const CustomAutocomplete = () => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList, 'Home'>>();
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<GeoapifyPlace[]>([]);
 
@@ -33,6 +39,7 @@ const CustomAutocomplete = () => {
           },
         },
       );
+      console.log('Fetched places:', res);
       setSuggestions(res.data.features); // Update suggestions
     } catch (err) {
       console.error('Error fetching places:', err);
@@ -40,11 +47,17 @@ const CustomAutocomplete = () => {
   };
 
   const handleSelect = (item: GeoapifyPlace) => {
-    console.log('Selected place:', item.properties.formatted);
-    setSuggestions([]); // Clear suggestions after selecting a place
-    setQuery(item.properties.formatted); // Update the query with the selected place
-  };
+    const {formatted, lat, lon} = item.properties;
 
+    navigation.navigate('Home', {
+      selectedAddress: formatted,
+      latitude: lat,
+      longitude: lon,
+    });
+
+    setSuggestions([]);
+    setQuery(formatted);
+  };
   return (
     <View>
       <TextInput

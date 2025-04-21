@@ -1,16 +1,27 @@
-import {View, StyleSheet, Image, TextInput} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Image,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native';
 import React, {use, useEffect, useState, useRef} from 'react';
 import MapView, {Marker} from 'react-native-maps';
 import {getCurrentLocation} from '../utils/getCurrentLocation';
 import GetLocation from 'react-native-get-location';
 import axios from 'axios';
+import {Polyline} from 'react-native-maps';
 
 type LocationType = {
   latitude: number;
   longitude: number;
 } | null;
 
-const HomeScreen = () => {
+const HomeScreen = ({route, navigation}: any) => {
+  const {selectedAddress, latitude, longitude} = route.params || {};
+  console.log('Selected Address:', selectedAddress);
+  console.log('Latitude:', latitude);
+  console.log('Longitude:', longitude);
   const mapRef = useRef<MapView>(null);
   const [address, setAddress] = useState('');
   const [userLocation, setUserLocation] = useState<LocationType>(null);
@@ -57,6 +68,23 @@ const HomeScreen = () => {
     getCurrentLocation();
   }, []);
 
+  useEffect(() => {
+    if (latitude && longitude) {
+      const coordinates = [
+        {latitude: userLocation?.latitude, longitude: userLocation?.longitude},
+        {
+          latitude: latitude,
+          longitude: longitude,
+        },
+      ];
+
+      mapRef.current?.fitToCoordinates(coordinates, {
+        edgePadding: {top: 200, right: 50, bottom: 50, left: 50},
+        animated: true,
+      });
+    }
+  }, [latitude, longitude, userLocation]);
+
   return (
     <View style={styles.container}>
       <MapView
@@ -82,11 +110,33 @@ const HomeScreen = () => {
             longitude: userLocation?.longitude ?? -74.006,
           }}
         />
+        {latitude && longitude && (
+          <Marker
+            coordinate={{
+              latitude: latitude,
+              longitude: longitude,
+            }}
+            pinColor="green"
+          />
+        )}
+        {latitude && longitude && (
+          <Polyline
+            coordinates={[
+              {
+                latitude: userLocation?.latitude ?? 40.7128,
+                longitude: userLocation?.longitude ?? -74.006,
+              },
+              {latitude: latitude, longitude: longitude},
+            ]}
+            strokeColor="#000" // fallback for when `strokeColors` is not supported by the map-provider
+            strokeColors={['black']}
+            strokeWidth={2}
+          />
+        )}
       </MapView>
 
       {/* Top Search Bar */}
       <View style={styles.row}>
-        {' '}
         <View style={styles.menu_container}>
           <Image
             style={styles.menu}
@@ -94,8 +144,12 @@ const HomeScreen = () => {
           />
         </View>
         <View style={styles.inputWrapper}>
-          <View style={styles.location} />
+          <Image
+            style={styles.menu}
+            source={require('../../assets/current_animation_4.gif')}
+          />
           <TextInput
+            editable={false}
             value={address}
             // onChangeText={setLocation}
             placeholder="Current location"
@@ -107,13 +161,20 @@ const HomeScreen = () => {
       {/* Bottom curved overlay */}
       <View style={styles.bottomSheet}>
         <View style={styles.innerBox}>
-          <View style={styles.searchBar}>
-            <Image
-              style={{width: 15, height: 15, marginLeft: 5}}
-              source={require('../../assets/search.png')}
-            />
-            <TextInput placeholder="Where are you going?" />
-          </View>
+          <TouchableOpacity onPress={() => navigation.navigate('Destination')}>
+            <View style={styles.searchBar}>
+              <Image
+                style={{width: 15, height: 15, marginLeft: 5}}
+                source={require('../../assets/search.png')}
+              />
+              <TextInput
+                value={selectedAddress}
+                editable={false}
+                placeholder="Where are you going?"
+                style={{marginRight: 28}}
+              />
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
     </View>

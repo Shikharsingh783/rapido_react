@@ -4,7 +4,10 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import CustomAutocomplete from '../utils/customAutoComplete';
 import {Navigation} from '../../rapido/src/navigation';
 
-const Destination = ({navigation}: any) => {
+const Destination = ({navigation, route}: any) => {
+  const {location} = route.params || {};
+  console.log('Location:', location.latitude);
+  console.log('Location:', location.longitude);
   return (
     <SafeAreaView style={styles.container}>
       <View
@@ -22,7 +25,7 @@ const Destination = ({navigation}: any) => {
         <Text style={styles.header}>Search Destination</Text>
       </View>
 
-      <CustomAutocomplete />
+      <CustomAutocomplete location={location} />
     </SafeAreaView>
   );
 };

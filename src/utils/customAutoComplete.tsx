@@ -1,10 +1,19 @@
 import React, {useState} from 'react';
-import {TextInput, FlatList, Text, TouchableOpacity, View} from 'react-native';
+import {
+  TextInput,
+  FlatList,
+  Text,
+  TouchableOpacity,
+  View,
+  Alert,
+} from 'react-native';
 import axios from 'axios';
 // import {Navigation} from '../../rapido/src/navigation';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../routes/types';
+import {getDistance} from 'geolib';
+import * as geolib from 'geolib';
 
 interface GeoapifyPlace {
   properties: {
@@ -14,11 +23,20 @@ interface GeoapifyPlace {
   };
 }
 
-const CustomAutocomplete = () => {
+const CustomAutocomplete = ({location}: any) => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'Home'>>();
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<GeoapifyPlace[]>([]);
+
+  const handlePlaceClick = (lat: number, lon: number) => {
+    const calculatedDistance = geolib.getPreciseDistance(
+      {latitude: location?.latitude ?? 0, longitude: location?.longitude ?? 0},
+      {latitude: lat, longitude: lon},
+    );
+    console.log('Distance:', calculatedDistance, 'meters');
+    return calculatedDistance;
+  };
 
   const fetchPlaces = async (text: string) => {
     setQuery(text);
@@ -48,16 +66,28 @@ const CustomAutocomplete = () => {
 
   const handleSelect = (item: GeoapifyPlace) => {
     const {formatted, lat, lon} = item.properties;
+    const calculatedDistance = handlePlaceClick(lat, lon);
 
-    navigation.navigate('Home', {
-      selectedAddress: formatted,
-      latitude: lat,
-      longitude: lon,
-    });
+    if (calculatedDistance > 1000000) {
+      Alert.alert(
+        'Distance Alert',
+        `The selected place is ${(calculatedDistance / 1000).toFixed(
+          2,
+        )} km away from your current location. We currently do not support such distances. Please try again with a distance less than 100 km.`,
+      );
+    } else {
+      navigation.navigate('Home', {
+        selectedAddress: formatted,
+        latitude: lat,
+        longitude: lon,
+        distance: calculatedDistance,
+      });
+    }
 
     setSuggestions([]);
     setQuery(formatted);
   };
+
   return (
     <View>
       <TextInput

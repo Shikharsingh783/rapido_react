@@ -4,6 +4,7 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
+  Text,
 } from 'react-native';
 import React, {use, useEffect, useState, useRef} from 'react';
 import MapView, {Marker} from 'react-native-maps';
@@ -18,10 +19,11 @@ type LocationType = {
 } | null;
 
 const HomeScreen = ({route, navigation}: any) => {
-  const {selectedAddress, latitude, longitude} = route.params || {};
+  const {selectedAddress, latitude, longitude, distance} = route.params || {};
   console.log('Selected Address:', selectedAddress);
   console.log('Latitude:', latitude);
   console.log('Longitude:', longitude);
+  console.log('Distance:', distance);
   const mapRef = useRef<MapView>(null);
   const [address, setAddress] = useState('');
   const [userLocation, setUserLocation] = useState<LocationType>(null);
@@ -161,7 +163,12 @@ const HomeScreen = ({route, navigation}: any) => {
       {/* Bottom curved overlay */}
       <View style={styles.bottomSheet}>
         <View style={styles.innerBox}>
-          <TouchableOpacity onPress={() => navigation.navigate('Destination')}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('Destination', {
+                location: userLocation,
+              })
+            }>
             <View style={styles.searchBar}>
               <Image
                 style={{width: 15, height: 15, marginLeft: 5}}
@@ -175,6 +182,38 @@ const HomeScreen = ({route, navigation}: any) => {
               />
             </View>
           </TouchableOpacity>
+          {longitude && latitude && (
+            <View
+              style={{
+                flexDirection: 'row',
+                gap: 10,
+                marginTop: 10,
+                justifyContent: 'space-between',
+                paddingHorizontal: 10,
+              }}>
+              <RideOption
+                title="Bike"
+                image={require('../../assets/bike2.png')}
+                ratePerKm={2}
+                baseFair={10}
+                distance={distance / 1000}
+              />
+              <RideOption
+                title="Car"
+                image={require('../../assets/car2.png')}
+                ratePerKm={5}
+                baseFair={20}
+                distance={distance / 1000}
+              />
+              <RideOption
+                title="Auto"
+                image={require('../../assets/auto2.png')}
+                ratePerKm={3}
+                baseFair={15}
+                distance={distance / 1000}
+              />
+            </View>
+          )}
         </View>
       </View>
     </View>
@@ -265,3 +304,48 @@ const styles = StyleSheet.create({
 });
 
 export default HomeScreen;
+
+const RideOption = ({title, image, ratePerKm, baseFair, distance}: any) => {
+  return (
+    <TouchableOpacity
+      style={{
+        backgroundColor: '#fff',
+        paddingTop: 10,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        alignItems: 'center',
+        paddingHorizontal: 18,
+        marginTop: 10,
+        height: 160,
+        shadowColor: '#000',
+        shadowOffset: {width: 0, height: 2},
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+      }}>
+      <Image
+        source={image}
+        style={{
+          height: 70,
+          width: 70,
+        }}
+      />
+      <View style={{alignItems: 'center'}}>
+        <Text style={{fontWeight: '600', fontSize: 15}}>{title}</Text>
+      </View>
+      <Text
+        style={{
+          fontSize: 16,
+          fontWeight: 'bold',
+          color: '#27ae60',
+          marginTop: 6,
+        }}>
+        ₹{(baseFair + ratePerKm * distance).toFixed(0)}
+      </Text>
+      <Text style={{fontSize: 12, color: '#888', marginTop: 10}}>
+        ₹{ratePerKm} per km
+      </Text>
+    </TouchableOpacity>
+  );
+};

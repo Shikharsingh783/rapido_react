@@ -3,6 +3,7 @@ export type RootStackParamList = {
     selectedAddress: string;
     latitude: number;
     longitude: number;
+    distance: number;
   };
   // add other screens if needed
 };

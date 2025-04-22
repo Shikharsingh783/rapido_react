@@ -87,6 +87,32 @@ const HomeScreen = ({route, navigation}: any) => {
     }
   }, [latitude, longitude, userLocation]);
 
+  const captainData = [
+    {
+      id: 1,
+      lat: 37.3821571,
+      long: -122.0923715,
+      name: 'Person 1',
+      type: 'bike',
+    },
+    {
+      id: 2,
+      lat: 37.3887415,
+      long: -122.08536930000001,
+      name: 'Person 2',
+      type: 'car',
+    },
+    {id: 3, lat: 37.3827878, long: -122.077937, name: 'Person 3', type: 'auto'},
+    {
+      id: 4,
+      lat: 37.3782852,
+      long: -122.0866501,
+      name: 'Person 4',
+      type: 'bike',
+    },
+    {id: 5, lat: 37.3770582, long: -122.0816042, name: 'Person 5', type: 'car'},
+  ];
+
   return (
     <View style={styles.container}>
       <MapView
@@ -135,6 +161,35 @@ const HomeScreen = ({route, navigation}: any) => {
             strokeWidth={2}
           />
         )}
+
+        {captainData &&
+          captainData.map((item, index) => {
+            let imageSource;
+
+            switch (item.type) {
+              case 'bike':
+                imageSource = require('../../assets/mapbike2.png');
+                break;
+              case 'car':
+                imageSource = require('../../assets/mapcar2.png');
+                break;
+              case 'auto':
+                imageSource = require('../../assets/mapauto3.png');
+                break;
+              default:
+                imageSource = require('../../assets/mapcar2.png'); // optional fallback
+            }
+            return (
+              <Marker
+                key={item.id}
+                coordinate={{latitude: item.lat, longitude: item.long}}>
+                <Image
+                  source={imageSource}
+                  style={{width: 40, height: 40, resizeMode: 'contain'}}
+                />
+              </Marker>
+            );
+          })}
       </MapView>
 
       {/* Top Search Bar */}
